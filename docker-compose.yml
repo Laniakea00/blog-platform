@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  backend:
+    build: .
+    container_name: node_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URI: "mongodb+srv://berikzhanalan:123@cluster0.0m4fx.mongodb.net/?retryWrites=true&w=majority"

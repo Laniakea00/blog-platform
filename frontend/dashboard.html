@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="scripts/utils.js"></script>
+    <script defer src="scripts/posts.js"></script>
+    <style>
+        :root {
+            --primary-color: #6c63ff;
+            --secondary-color: #4a90e2;
+            --success-color: #00c851;
+            --danger-color: #ff4444;
+            --background-light: #f0f2f5;
+            --text-light: #2c3e50;
+            --card-bg-light: rgba(255, 255, 255, 0.7);
+            --nav-bg-light: rgba(255, 255, 255, 0.8);
+
+            /* Dark theme variables */
+            --background-dark: #1a1a1a;
+            --text-dark: #ffffff;
+            --card-bg-dark: rgba(40, 40, 40, 0.7);
+            --nav-bg-dark: rgba(30, 30, 30, 0.8);
+        }
+
+        [data-theme="dark"] {
+            --background: var(--background-dark);
+            --text-color: var(--text-dark);
+            --card-bg: var(--card-bg-dark);
+            --nav-bg: var(--nav-bg-dark);
+        }
+
+        [data-theme="light"] {
+            --background: var(--background-light);
+            --text-color: var(--text-light);
+            --card-bg: var(--card-bg-light);
+            --nav-bg: var(--nav-bg-light);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 15s infinite;
+        }
+
+        .circle:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: var(--primary-color);
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .circle:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: var(--secondary-color);
+            bottom: 20%;
+            right: 15%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-50px) scale(1.1); }
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 50px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-info {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow:
+                    20px 20px 60px rgba(0, 0, 0, 0.1),
+                    -20px -20px 60px rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: white;
+        }
+
+        .user-details h3 {
+            margin-bottom: 5px;
+        }
+
+        .post-form {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow:
+                    20px 20px 60px rgba(0, 0, 0, 0.1),
+                    -20px -20px 60px rgba(255, 255, 255, 0.05);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 1em;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        textarea.input-field {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .input-field:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .post-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow:
+                    20px 20px 60px rgba(0, 0, 0, 0.1),
+                    -20px -20px 60px rgba(255, 255, 255, 0.05);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.2em;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .edit-btn { color: var(--secondary-color); }
+        .delete-btn { color: var(--danger-color); }
+
+        .post-content {
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .post-meta {
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 5px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(180deg);
+        }
+
+        .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            color: var(--danger-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light" onload="displayUserInfo(); fetchUserPosts(); protectPage();">
+<div class="background-animation">
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
+
+<nav>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+    </div>
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
+</nav>
+
+<div class="container">
+    <div class="dashboard-header">
+        <h1 id="welcome-message" style="margin-top: 50px">Welcome to Your Dashboard</h1>
+        <h2 id="user-name"></h2>
+    </div>
+
+    <div class="post-form">
+        <h2 id="formHeading">Create a New Post</h2>
+        <form id="postForm">
+            <div class="input-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" class="input-field" placeholder="Enter post title" required>
+            </div>
+            <div class="input-group">
+                <label for="content">Content</label>
+                <textarea id="content" class="input-field" placeholder="Write your post content here..." required></textarea>
+            </div>
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary" id="submitPost">
+                    <i class="fas fa-paper-plane"></i> Publish Post
+                </button>
+                <button type="button" class="btn btn-secondary" id="cancelEdit" style="display: none;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <h2>Your Posts</h2>
+    <div class="posts-grid" id="posts">
+        <!-- Posts will be dynamically inserted here -->
+    </div>
+
+    <button id="openChat" class="btn btn-primary">
+        <i class="fas fa-comments"></i> Open Chat
+    </button>
+
+    <div class="error-message" id="error-message"></div>
+</div>
+
+<script>
+    document.getElementById("openChat")?.addEventListener("click", () => {
+        window.open("chat.html", "_blank", "width=600,height=700");
+    });
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const icon = themeToggle.querySelector('i');
+
+    themeToggle.addEventListener('click', () => {
+        if (body.getAttribute('data-theme') === 'light') {
+            body.setAttribute('data-theme', 'dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            body.setAttribute('data-theme', 'light');
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    });
+
+    // Display User Info
+    async function displayUserInfo() {
+        const user = await getUser();
+        if (user) {
+            document.getElementById('user-name').textContent = `Welcome, ${user.username}!`;
+        }
+    }
+
+    // Protect Page
+    function protectPage() {
+        const token = getToken();
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+    }
+
+    // Logout
+    function logout() {
+        removeToken();
+        localStorage.removeItem('user');
+        alert('Logged out successfully!');
+        window.location.href = 'index.html';
+    }
+
+    // Form Submission
+    const postForm = document.getElementById('postForm');
+    const postsContainer = document.getElementById('posts');
+
+    postForm.addEventListener('submit', handlePostForm);
+
+    // Fetch User Posts
+    async function fetchUserPosts() {
+        const token = getToken();
+        if (!token) {
+            showError('You need to log in first!');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/mine`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            const posts = await response.json();
+            renderPosts(posts);
+        } catch (error) {
+            console.error('Error fetching user posts:', error);
+            showError('Failed to fetch your posts. Please try again later.');
+        }
+    }
+
+    // Render Posts
+    function renderPosts(posts) {
+        const postsContainer = document.getElementById('posts');
+        postsContainer.innerHTML = '';
+
+        if (posts.length === 0) {
+            postsContainer.innerHTML = '<p>No posts found.</p>';
+            return;
+        }
+
+        posts.forEach(post => {
+            const postCard = document.createElement('div');
+            postCard.className = 'post-card';
+            postCard.innerHTML = `
+                    <div class="post-header">
+                        <h3>${post.title}</h3>
+                        <div class="post-actions">
+                            <button class="action-btn edit-btn" onclick="editPost('${post._id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deletePost('${post._id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>${post.content}</p>
+                    </div>
+                    <div class="post-meta">
+                        <span><i class="far fa-clock"></i> Posted on: ${new Date(post.createdAt).toLocaleDateString()}</span>
+                    </div>
+                `;
+            postsContainer.appendChild(postCard);
+        });
+    }
+
+    // Show Error
+    function showError(message) {
+        const errorElement = document.getElementById('error-message');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => {
+            errorElement.style.display = 'none';
+        }, 3000);
+    }
+
+    // Get stored JWT token from localStorage
+    function getToken() {
+        return localStorage.getItem("token");
+    }
+
+    // Save user token to localStorage
+    function saveToken(token) {
+        localStorage.setItem("token", token);
+    }
+
+    // Remove user token from localStorage (Logout)
+    function removeToken() {
+        localStorage.removeItem("token");
+    }
+
+    // Check if the user is logged in
+    function isLoggedIn() {
+        return !!getToken();
+    }
+
+    // Redirect to login page if user is not authenticated
+    function protectPage() {
+        if (!isLoggedIn()) {
+            showError("You must be logged in to access this page.");
+            window.location.href = "login.html";
+        }
+    }
+
+    // Fetch logged-in user details
+    async function getUser() {
+        const token = getToken();
+        if (!token) return null;
+
+        try {
+            const response = await fetch("http://localhost:3000/auth/profile", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                localStorage.setItem("user", JSON.stringify(user)); // Store user details
+                return user;
+            } else {
+                removeToken(); // Invalid token, remove it
+                return null;
+            }
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+            return null;
+        }
+    }
+
+    // Get stored user details from localStorage
+    function getStoredUser() {
+        const user = localStorage.getItem("user");
+        return user ? JSON.parse(user) : null;
+    }
+
+    // Logout the user
+    function logout() {
+        removeToken();
+        localStorage.removeItem("user");
+        alert("Logged out successfully!");
+        updateNavBar(); // Обновите навигационную панель
+        window.location.href = "index.html"; // Перенаправьте на главную страницу
+    }
+
+    // Update the navigation bar based on login status
+    function updateNavBar() {
+        const loginLink = document.getElementById("loginLink");
+        const registerLink = document.getElementById("registerLink");
+        const logoutButton = document.getElementById("logoutButton");
+
+        if (isLoggedIn()) {
+            loginLink.style.display = "none";
+            registerLink.style.display = "none";
+            logoutButton.style.display = "inline-block";
+        } else {
+            loginLink.style.display = "inline-block";
+            registerLink.style.display = "inline-block";
+            logoutButton.style.display = "none";
+        }
+    }
+
+    // Redirect user to dashboard if already logged in (Prevents accessing login/register when logged in)
+    if (isLoggedIn() && (window.location.pathname.includes("login") || window.location.pathname.includes("register"))) {
+        window.location.href = "dashboard.html";
+    }
+
+    // Вызовите эту функцию при загрузке страницы
+    window.addEventListener("load", updateNavBar);
+</script>
+</body>
+</html>

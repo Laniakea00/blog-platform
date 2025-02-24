@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат поддержки</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Чат с поддержкой</h1>
+    <div id="chat" class="chat-box"></div>
+    <input type="text" id="messageInput" placeholder="Введите сообщение...">
+    <button onclick="sendMessage()">Отправить</button>
+</div>
+
+<script>
+    function generateChatID() {
+        const array = new Uint8Array(16);
+        crypto.getRandomValues(array);
+        return Array.from(array).map(byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    let chatID = localStorage.getItem('chat_id');
+    if (!chatID) {
+        chatID = generateChatID();
+        localStorage.setItem('chat_id', chatID);
+    }
+
+    const chatBox = document.getElementById('chat');
+
+    function saveMessageToLocal(msg) {
+        let chatHistory = JSON.parse(localStorage.getItem(chatID) || '[]');
+        chatHistory.push(msg);
+        localStorage.setItem(chatID, JSON.stringify(chatHistory));
+    }
+
+    function loadChatFromLocalStorage() {
+        let chatHistory = JSON.parse(localStorage.getItem(chatID) || '[]');
+        chatHistory.forEach(msg => {
+            chatBox.innerHTML += `<p><strong>${msg.sender}:</strong> ${msg.content}</p>`;
+        });
+    }
+
+    const socket = new WebSocket(`ws://localhost:3000/ws?chat_id=${chatID}`);
+
+    socket.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+        chatBox.innerHTML += `<p><strong>${message.sender}:</strong> ${message.content}</p>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        saveMessageToLocal(message);
+    };
+
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const message = input.value.trim();
+        if (message) {
+            const msgObject = { chat_id: chatID, sender: "Client", content: message };
+            socket.send(JSON.stringify(msgObject));
+            chatBox.innerHTML += `<p><strong>Вы:</strong> ${message}</p>`;
+            input.value = '';
+            saveMessageToLocal(msgObject);
+        }
+    }
+
+    loadChatFromLocalStorage();
+</script>
+</body>
+</html>

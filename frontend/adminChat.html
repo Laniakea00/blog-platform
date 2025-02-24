@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Chat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Чаты клиентов</h1>
+    <ul id="chatList" class="chat-list"></ul>
+
+    <h2>Сообщения</h2>
+    <div id="messages" class="chat-box"></div>
+    <input type="text" id="messageInput" placeholder="Введите сообщение">
+    <button onclick="sendMessage()">Отправить</button>
+</div>
+
+<script>
+    const adminId = "admin";  // ID администратора
+    let currentChatID = null;
+    const socket = new WebSocket(`ws://localhost:3000/ws?admin=${adminId}`);
+
+    socket.onopen = function() {
+        console.log("Администратор подключился к WebSocket");
+        loadActiveChats();
+    };
+
+    socket.onmessage = function(event) {
+        const msg = JSON.parse(event.data);
+        if (!currentChatID || msg.chat_id !== currentChatID) return;
+
+        const messagesDiv = document.getElementById("messages");
+        messagesDiv.innerHTML += `<p><strong>${msg.sender}:</strong> ${msg.content}</p>`;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    };
+
+    function loadActiveChats() {
+        fetch('/admin/active')
+            .then(response => response.json())
+            .then(data => {
+                const chatList = document.getElementById("chatList");
+                chatList.innerHTML = "";
+
+                data.activeChats.forEach(chatID => {
+                    const li = document.createElement("li");
+                    li.textContent = `Чат ${chatID}`;
+                    li.classList.add("chat-item");
+
+                    const deleteButton = document.createElement("button");
+                    deleteButton.textContent = "Удалить";
+                    deleteButton.onclick = (event) => {
+                        event.stopPropagation();
+                        deleteChat(chatID);
+                    };
+
+                    li.onclick = () => {
+                        currentChatID = chatID;
+                        document.getElementById("messages").innerHTML = "";
+                        loadMessages(chatID);
+                    };
+
+                    li.appendChild(deleteButton);
+                    chatList.appendChild(li);
+                });
+            })
+            .catch(error => console.error("Ошибка загрузки чатов:", error));
+    }
+
+    function loadMessages(chatID) {
+        fetch(`/chats/${chatID}`)
+            .then(response => response.json())
+            .then(messages => {
+                const messagesDiv = document.getElementById("messages");
+                messagesDiv.innerHTML = "";
+
+                messages.forEach(msg => {
+                    messagesDiv.innerHTML += `<p><strong>${msg.sender}:</strong> ${msg.content}</p>`;
+                });
+
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            })
+            .catch(error => console.error("Ошибка загрузки сообщений:", error));
+    }
+
+    function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const message = input.value.trim();
+        if (!message || !currentChatID) return;
+
+        socket.send(JSON.stringify({ chat_id: currentChatID, sender: "Admin", content: message }));
+        input.value = "";
+    }
+
+    function deleteChat(chatID) {
+        if (!confirm(`Удалить чат ${chatID}?`)) return;
+
+        fetch(`/delete_chat?chat_id=${chatID}`, { method: "DELETE" })
+            .then(response => {
+                if (response.ok) {
+                    alert(`Чат ${chatID} удален.`);
+                    loadActiveChats();
+                    document.getElementById("messages").innerHTML = "";
+                    if (currentChatID === chatID) {
+                        currentChatID = null;
+                    }
+                } else {
+                    alert("Ошибка удаления чата.");
+                }
+            })
+            .catch(error => console.error("Ошибка удаления:", error));
+    }
+
+</script>
+</body>
+</html>

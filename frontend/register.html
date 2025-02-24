@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="scripts/utils.js"></script>
+    <script defer src="scripts/auth.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --background: #f0f2f5;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text: #1f2937;
+            --text-secondary: #4b5563;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --success: #10b981;
+            --error: #ef4444;
+            --neu-shadow1: #ffffff;
+            --neu-shadow2: #d1d9e6;
+        }
+
+        .dark-mode {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --background: #111827;
+            --card-bg: rgba(17, 24, 39, 0.9);
+            --text: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --neu-shadow1: #1a1f2e;
+            --neu-shadow2: #0c111d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.3;
+            }
+            50% {
+                transform: translateY(-100px) rotate(180deg);
+                opacity: 0.6;
+            }
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 40px;
+            backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 4px 30px var(--shadow);
+        }
+
+        nav a, nav button {
+            color: var(--text);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent
+            );
+            transition: 0.5s;
+        }
+
+        nav a:hover::before {
+            left: 100%;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 120px auto 40px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .register-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow:
+                    20px 20px 60px var(--neu-shadow2),
+                    -20px -20px 60px var(--neu-shadow1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.2em;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            border: none;
+            border-radius: 12px;
+            background: var(--background);
+            color: var(--text);
+            font-size: 1rem;
+            box-shadow:
+                    inset 8px 8px 16px var(--neu-shadow2),
+                    inset -8px -8px 16px var(--neu-shadow1);
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow:
+                    inset 12px 12px 24px var(--neu-shadow2),
+                    inset -12px -12px 24px var(--neu-shadow1);
+        }
+
+        input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow:
+                    8px 8px 16px var(--neu-shadow2),
+                    -8px -8px 16px var(--neu-shadow1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.2),
+                    transparent
+            );
+            transition: 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:active {
+            transform: scale(0.98);
+            box-shadow:
+                    4px 4px 8px var(--neu-shadow2),
+                    -4px -4px 8px var(--neu-shadow1);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-secondary);
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        #error-message {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 24px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .container {
+                margin-top: 100px;
+            }
+
+            .register-card {
+                padding: 30px 20px;
+            }
+        }
+
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(16, 185, 129, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.5s;
+        }
+
+        .success-animation.active {
+            opacity: 1;
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #fff;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0px 0px 0px var(--success);
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+    </style>
+</head>
+<body onload="updateNavBar();">
+
+<div class="particles" id="particles"></div>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="login.html" id="loginLink">Login</a>
+    <a href="register.html" id="registerLink">Register</a>
+    <button onclick="logout()" id="logoutButton" style="display: none;">Logout</button>
+    <button class="theme-toggle" id="themeToggle">
+        <i class='bx bx-moon'></i>
+    </button>
+</nav>
+
+<div class="container">
+    <div class="register-card">
+        <h1>Register</h1>
+        <form id="registerForm">
+            <div class="input-group">
+                <i class='bx bx-user'></i>
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <i class='bx bx-envelope'></i>
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <i class='bx bx-lock-alt'></i>
+                <input type="password" id="password" placeholder="Password" required>
+                <i class='bx bx-hide password-toggle' id="passwordToggle"></i>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        <div class="login-link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+        <div id="error-message"></div>
+    </div>
+</div>
+
+<div class="success-animation" id="successAnimation">
+    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+    </svg>
+</div>
+
+<script>
+    // Create particles
+    const particles = document.getElementById('particles');
+    for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 5 + 's';
+        particles.appendChild(particle);
+    }
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const icon = themeToggle.querySelector('i');
+
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        icon.classList.toggle('bx-moon');
+        icon.classList.toggle('bx-sun');
+    });
+
+    // Password Toggle
+    const passwordToggle = document.getElementById('passwordToggle');
+    const passwordInput = document.getElementById('password');
+
+    passwordToggle.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        passwordToggle.classList.toggle('bx-hide');
+        passwordToggle.classList.toggle('bx-show');
+    });
+
+    // Form Handling
+    const registerForm = document.getElementById('registerForm');
+    const errorMessage = document.getElementById('error-message');
+    const successAnimation = document.getElementById('successAnimation');
+
+    registerForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // Validate input
+        if (password.length < 6) {
+            errorMessage.textContent = 'Password must be at least 6 characters long';
+            errorMessage.style.display = 'block';
+            return;
+        }
+
+        // Simulate registration
+        successAnimation.classList.add('active');
+        setTimeout(() => {
+            successAnimation.classList.remove('active');
+            window.location.href = 'login.html';
+        }, 2000);
+    });
+
+    // Input animations
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', () => {
+            input.parentElement.style.transform = 'scale(1.02)';
+        });
+
+        input.addEventListener('blur', () => {
+            input.parentElement.style.transform = 'scale(1)';
+        });
+    });
+</script>
+</body>
+</html>

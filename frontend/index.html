@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Blog Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="scripts/utils.js"></script>
+    <script defer src="scripts/posts.js"></script>
+    <script defer src="scripts/auth.js"></script>
+    <style>
+        :root {
+            --primary-color: #6c63ff;
+            --secondary-color: #4a90e2;
+            --success-color: #00c851;
+            --danger-color: #ff4444;
+            --background-light: #f0f2f5;
+            --text-light: #2c3e50;
+            --card-bg-light: rgba(255, 255, 255, 0.7);
+            --nav-bg-light: rgba(255, 255, 255, 0.8);
+
+            /* Dark theme variables */
+            --background-dark: #1a1a1a;
+            --text-dark: #ffffff;
+            --card-bg-dark: rgba(40, 40, 40, 0.7);
+            --nav-bg-dark: rgba(30, 30, 30, 0.8);
+        }
+
+        [data-theme="dark"] {
+            --background: var(--background-dark);
+            --text-color: var(--text-dark);
+            --card-bg: var(--card-bg-dark);
+            --nav-bg: var(--nav-bg-dark);
+        }
+
+        [data-theme="light"] {
+            --background: var(--background-light);
+            --text-color: var(--text-light);
+            --card-bg: var(--card-bg-light);
+            --nav-bg: var(--nav-bg-light);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 15s infinite;
+        }
+
+        .circle:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            background: var(--primary-color);
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .circle:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: var(--secondary-color);
+            bottom: 20%;
+            right: 15%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-50px) scale(1.1);
+            }
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 50px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 5px 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 120px auto 50px;
+            padding: 0 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 80px;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeInUp 1s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .post-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow:
+                    20px 20px 60px rgba(0, 0, 0, 0.1),
+                    -20px -20px 60px rgba(255, 255, 255, 0.05);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .post-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .post-content p {
+            color: var(--text-color);
+            opacity: 0.8;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.6;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            color: var(--danger-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -468px 0;
+            }
+            100% {
+                background-position: 468px 0;
+            }
+        }
+
+        .loading {
+            background: linear-gradient(to right, #f6f7f8 8%, #edeef1 18%, #f6f7f8 33%);
+            background-size: 800px 104px;
+            animation: shimmer 1.5s infinite linear;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 5px;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body data-theme="light" onload="fetchPosts(); updateNavBar();">
+<div class="background-animation">
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
+
+<nav>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="login.html" id="loginLink">Login</a>
+        <a href="register.html" id="registerLink">Register</a>
+        <button class="btn btn-secondary" id="logoutButton" style="display: none;" onclick="logout()">Logout</button>
+    </div>
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
+</nav>
+
+<div class="container">
+    <div class="hero">
+        <h1>Welcome to Modern Blog</h1>
+        <p>Discover amazing stories and share your thoughts with the world</p>
+    </div>
+
+    <div class="posts-grid" id="posts">
+        <!-- Posts will be dynamically inserted here -->
+    </div>
+
+    <div class="error-message" id="error-message"></div>
+</div>
+
+<script>
+    // Theme Toggle Functionality
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const icon = themeToggle.querySelector('i');
+
+    themeToggle.addEventListener('click', () => {
+        if (body.getAttribute('data-theme') === 'light') {
+            body.setAttribute('data-theme', 'dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            body.setAttribute('data-theme', 'light');
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    });
+
+    // Function to render posts
+    function renderPosts(posts) {
+        const postsContainer = document.getElementById('posts');
+        postsContainer.innerHTML = ""; // Clear previous content
+
+        if (posts.length === 0) {
+            postsContainer.innerHTML = "<p>No posts found.</p>";
+            return;
+        }
+
+        posts.forEach(post => {
+            const postCard = document.createElement('article');
+            postCard.classList.add('post-card');
+            postCard.innerHTML = `
+                <div class="post-content">
+                    <h3>${post.title}</h3>
+                    <p>${post.content}</p>
+                    <div class="post-meta">
+                        <span>${post.authorUsername}</span>
+                        <span>${new Date(post.createdAt).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `;
+            postsContainer.appendChild(postCard);
+        });
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchPosts();
+
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.post-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(50px)';
+            observer.observe(card);
+        });
+    });
+
+    // Error handling function
+    function showError(message) {
+        const errorElement = document.getElementById('error-message');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => {
+            errorElement.style.display = 'none';
+        }, 5000);
+    }
+
+    // Logout function
+    function logout() {
+        removeToken();
+        localStorage.removeItem('user');
+        alert('Logged out successfully!');
+        updateNavBar(); // Update the navigation bar
+        window.location.href = 'index.html'; // Redirect to the home page
+    }
+
+    // Get stored JWT token from localStorage
+    function getToken() {
+        return localStorage.getItem("token");
+    }
+
+    // Save user token to localStorage
+    function saveToken(token) {
+        localStorage.setItem("token", token);
+    }
+
+    // Remove user token from localStorage (Logout)
+    function removeToken() {
+        localStorage.removeItem("token");
+    }
+
+    // Check if the user is logged in
+    function isLoggedIn() {
+        return !!getToken();
+    }
+
+    // Update the navigation bar based on login status
+    function updateNavBar() {
+        const loginLink = document.getElementById("loginLink");
+        const registerLink = document.getElementById("registerLink");
+        const logoutButton = document.getElementById("logoutButton");
+
+        if (isLoggedIn()) {
+            loginLink.style.display = "none";
+            registerLink.style.display = "none";
+            logoutButton.style.display = "inline-block";
+        } else {
+            loginLink.style.display = "inline-block";
+            registerLink.style.display = "inline-block";
+            logoutButton.style.display = "none";
+        }
+    }
+
+    // Redirect user to dashboard if already logged in (Prevents accessing login/register when logged in)
+    if (isLoggedIn() && (window.location.pathname.includes("login") || window.location.pathname.includes("register"))) {
+        window.location.href = "dashboard.html";
+    }
+
+    // Call this function on page load
+    window.addEventListener("load", updateNavBar);
+</script>
+</body>
+</html>
